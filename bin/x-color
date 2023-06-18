@@ -1,0 +1,28 @@
+#!/bin/sh -e
+##:
+#h: Usage: x-color
+#h:
+#h: Select a point in the screen and copy it's color value
+#h: with the #RRGGBB format.
+##:
+x_color() {
+    local color="$(grabc)"
+    echo -n "${color}" | xclip -selection "clipboard" -i
+    echo -n "${color}" | xclip -selection "primary"   -i
+    echo -n "${color}" | xclip -selection "secondary" -i
+    echo "${color}"
+}
+if ! which "grabc" "xclip" >/dev/null 2>&1; then
+    echo >&2 "error: Please install 'grabc' and 'xclip'."
+    exit 1
+fi
+if test @"$(basename "$0")" = @"x-color";then
+    case "${1}" in
+        -h|--help)
+            sed -n 's/^ *#h: \{0,1\}//p' "$0"
+            ;;
+        *)
+            x_color "$@"; exit 0
+            ;;
+    esac
+fi
