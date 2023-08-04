@@ -1,0 +1,25 @@
+#!/bin/sh -e
+##:
+#h: Usafe: x-clip-pipe [COMMAND]
+#h:
+#h: Pipe the content in the clipboard to command and put it's output
+#h: in the clipboard. If no command is specified it is asked with
+#h: dmenu.
+##:
+x_clip_pipe() {
+    if test -n "$1"; then
+        local cmd="$*"
+    else
+        local cmd="$(dmenu -p 'Command:' < /dev/null)"
+        test -n "${cmd}"
+    fi
+    xclip -selection "clipboard" -o \
+        | sh -ec "${cmd}" \
+        | xclip -selection "clipboard" -i
+}
+if test @"$(basename "$0")" = @"x-clip-pipe";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
+        *)         x_clip_pipe "$@"; exit 0;;
+    esac
+fi

@@ -1,0 +1,18 @@
+#!/bin/sh -e
+##:
+#h: Usage: x-clip-edit
+#h:
+#h: Edit clipboard content.
+##:
+x_clip_edit() {
+    local tmp="$(mktemp)"
+    xclip -selection "clipboard" -o > "${tmp}" || true
+    xedit "${tmp}"
+    xclip -selection "clipboard" -i < "${tmp}" || true
+}
+if test @"$(basename "$0")" = @"x-clip-edit";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
+        *)         x_clip_edit "$@"; exit 0;;
+    esac
+fi

@@ -1,0 +1,33 @@
+#!/bin/sh -e
+##:
+#h: Usage: x-clip-trans
+#h:
+#h: Translate the text inside the clipboard.
+##:
+x_clip_trans() {
+    local sel lang
+    clear
+    echo ""
+    echo "Output language: es, en"
+    echo ""
+    echo "[SEL]"
+    read -r sel
+    case "${sel}" in
+        es) lang=es_ES.UTF-8;;
+        en) lang=en_US.UTF-8;;
+    esac
+    sel="$(xclip -selection "clipboard" -o)"
+    LANG="${lang}" trans -b "${sel}" | xclip -selection "clipboard" -i
+    clear
+    echo "============================================="
+    xclip -selection "clipboard" -o
+    echo "============================================="
+    echo "[ENTER]"
+    read -r ign
+}
+if test @"$(basename "$0")" = @"x-clip-trans";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
+        *)         x_clip_trans "$@"; exit 0;;
+    esac
+fi

@@ -1,0 +1,44 @@
+#!/bin/sh -e
+##:
+#h: Usage: x-phone [-V] COMMAND
+#h:
+#h: Execute a command inside a separate X11 server with a phone size.
+##:
+x_phone() {
+    local OPTIND optopt lang
+    ## Parse command line arguments.
+    while getopts "V" optopt; do
+        case $optopt in
+            V)  echo "X_PHONE_SIZE    : ${X_PHONE_SIZE}"
+                echo "X_PHONE_DISPLAY : ${X_PHONE_DISPLAY}"
+                return 0;;
+            \?) return 1;;
+        esac
+    done
+    shift $(( $OPTIND - 1 ))
+    ## Get keyboard layout.
+    lang="$(setxkbmap -query | sed -n 's|layout: *||p')"
+    ## Start server.
+    mkdir -p ~/.log
+    echo   >> ~/.log/xephyr.log "[XEPHYR][${DISPLAY}][${X_PHONE_DISPLAY}]"
+    Xephyr >> ~/.log/xephyr.log 2>&1 \
+           -ac -screen "${X_PHONE_SIZE}" \
+           -br -reset ${1:+ -terminate } "${X_PHONE_DISPLAY}" &
+    sleep 1
+    ## Start program.
+    if test -n "$1"; then
+        DISPLAY="${X_PHONE_DISPLAY}" "$@" >> ~/.log/xephyr.log 2>&1 &
+        sleep 1
+    fi
+    ## Change language.
+    DISPLAY="${X_PHONE_DISPLAY}" setxkbmap "${lang}"
+}
+## -------------------------------------------------------------------
+X_PHONE_SIZE="${X_PHONE_SIZE:-375x612}"
+X_PHONE_DISPLAY="${X_PHONE_DISPLAY:-:1}"
+if test @"$(basename "$0")" = @"x-phone";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
+        *)         x_phone "$@"; exit 0;;
+    esac
+fi

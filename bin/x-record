@@ -1,0 +1,105 @@
+#!/bin/sh -e
+##:
+#h: Start recording: x-record -av -o MKV-FILE
+#h: Stop recording : x-record -s
+#h:
+#h: You can view configuration variables with "-V" and
+#h: set them in "~/.x-record.cfg".
+##:
+x_record() {
+    local OPTIND optopt X_RECORD_OUTPUT opt_a= opt_v= 
+    ## Parse command line options.
+    while getopts "Vavo:s" optopt; do
+        case $optopt in
+            V)  x_record_show_variables; return 0;;
+            a)  opt_a=y;; v) opt_v=y;; s) opt_s=y;;
+            o)  X_RECORD_OUTPUT="${OPTARG}";;
+            \?) return 1;;
+        esac
+    done
+    shift $(( $OPTIND - 1 ))
+    ## Start recording.
+    if test -n "${opt_v}${opt_a}"; then
+        x_record_start
+    fi
+    if test -n "${opt_s}"; then
+        x_record_stop
+    fi
+}
+x_record_show_variables() {
+    cat <<-EOF
+	X_RECORD_PULSE_DEVICE : ${X_RECORD_PULSE_DEVICE}
+	X_RECORD_XORG_DISPLAY : ${X_RECORD_XORG_DISPLAY}
+	X_RECORD_VIDEO_SIZE   : ${X_RECORD_VIDEO_SIZE}
+	X_RECORD_OUTPUT       : ${X_RECORD_OUTPUT}
+	EOF
+}
+x_record_calc_variables() {
+    if test -e ~/.x-record.cfg; then
+        . ~/.x-record.cfg
+    fi
+    X_RECORD_OUTPUT="${X_RECORD_OUTPUT:-/tmp/x-record.mkv}"
+}
+
+## -------------------------------------------------------------------
+x_record_start() {
+    local args1="" args2=""
+    ## Calculate video flags.
+    if test ! -n "${opt_v}"; then
+        true
+    elif test ! -n "${X_RECORD_XORG_DISPLAY:-${DISPLAY}}"; then
+        echo >&2 "error: Please set DISPLAY/X_RECORD_XORG_DISPLAY."
+        return 1
+    else
+        args1="${args1} -f x11grab -i ${X_RECORD_XORG_DISPLAY:-${DISPLAY}}"
+        if test -n "${X_RECORD_VIDEO_SIZE}"; then
+            args1="${args1} -video_size ${X_RECORD_VIDEO_SIZE}"
+        fi
+        args2="${args2} -c:v libvpx -level 4.0"
+    fi
+    ## Calculate audio flags.
+    if test ! -n "${opt_a}"; then
+        true
+    elif test ! -n "${X_RECORD_PULSE_DEVICE}"; then
+        echo >&2 "error: Please set X_RECORD_PULSE_DEVICE."
+        return 1
+    else
+        args1="${args1} -f pulse -i ${X_RECORD_PULSE_DEVICE}"
+        args2="${args2} -c:a libvorbis"
+    fi
+    ## Calculate temporary file.
+    local fmt="$(echo "${X_RECORD_OUTPUT}" | sed -n 's|.*\.||p')"
+    local tmp="${TEMP:-/tmp}/x-record.${fmt}"
+    ## Launch new process.
+    pkill ffmpeg 2>/dev/null || true
+    echo "================================================"
+    echo "ffmpeg -y ${args1} ${args2} ${tmp}"
+    echo "================================================"
+    DISPLAY="${DISPLAY_ORIG:-${DISPLAY}}" ffmpeg -y ${args1} ${args2} "${tmp}" &
+    echo "${tmp}"             > "${TEMP:-/tmp/x-record.tmp}"
+    echo "${X_RECORD_OUTPUT}" > "${TEMP:-/tmp/x-record.out}"
+}
+x_record_stop() {
+    local 
+    if pkill -INT ffmpeg 2>/dev/null; then
+        sleep 3
+        tmp="$(cat /tmp/x-record.tmp)" out="$(cat /tmp/x-record.out)"
+        echo -n "Save the recording (${out})? y/N "
+        read res
+        if test @"${res}" = @"y"; then
+            cp -v "${tmp}" "${out}"
+        fi
+    fi
+}
+
+
+
+
+## -------------------------------------------------------------------
+x_record_calc_variables
+if test @"$(basename "$0")" = @"x-record";then
+    case "${1}" in
+        ''|-h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
+        *)            x_record "$@"; exit 0             ;;
+    esac
+fi

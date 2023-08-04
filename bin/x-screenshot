@@ -15,11 +15,7 @@ if ! which xdotool import xdg-open >/dev/null 2>&1; then
 fi
 if test @"$(basename "$0")" = @"x-screenshot";then
     case "${1}" in
-        -h|--help)
-            sed -n 's/^ *#h: \{0,1\}//p' "$0"
-            ;;
-        *)
-            x_screenshot "$@"; exit 0
-            ;;
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
+        *)         x_screenshot "$@"; exit 0;;
     esac
 fi
