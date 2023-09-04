@@ -12,6 +12,12 @@ x-auto
     Define scripts in "/etc/x-auto" with X11 automatizations with
     xdotool(1) and launch them with "x-auto".
 
+x-clip-clean
+
+    Usage: x-clip-clean
+    
+    Clean selection from trash.
+
 x-clip-edit
 
     Usage: x-clip-edit
@@ -44,6 +50,18 @@ x-color
     
     Select a point in the screen and copy it's color value
     with the #RRGGBB format.
+
+x-open
+
+    Usage: x-open -V | -l | -m FILE | FILE
+    
+    Open a file or URL using the user's preferred application.
+    
+    To choose which program to use x-open executes the scripts
+    in '/etc/x-open' and '~/.local/etc/x-open' passing to them
+    the file or URL. Each line they return is a posible command.
+    
+    You can list the scripts with -l and the menu with -m FILE.
 
 x-phone
 
