@@ -5,6 +5,8 @@
 #h: Pipe the content in the clipboard to command and put it's output
 #h: in the clipboard. If no command is specified it is asked with
 #h: dmenu.
+#x:
+#x: Dependencies: xclip, dmenu
 ##:
 x_clip_pipe() {
     if test -n "$1"; then

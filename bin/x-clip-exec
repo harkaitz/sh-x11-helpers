@@ -3,6 +3,8 @@
 #h: Usage: x-clip-exec
 #h:
 #h: Execute the commands in the clipboard.
+#x:
+#x: Dependencies: xclip, xterm
 ##:
 x_clip_exec() (
     export CMD="$(xclip -selection "clipboard" -o)"

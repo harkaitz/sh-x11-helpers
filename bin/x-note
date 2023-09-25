@@ -1,0 +1,97 @@
+#!/bin/sh -e
+##:
+#h: Usage: x-note -V | ...
+#h:
+#h: ... n NAME      : Create new notes file.
+#h: ... NAME d      : Delete notes file.
+#h: ... NAME a TAKE : Add new take.
+#h: ... NAME p      : Print take (and copy to clipboard)
+#x:
+#x: Dependencies: dmenu, x-editor
+. x-editor
+x_note() {
+    local OPTIND optopt sel1 sel2 file
+    
+    ## Parse command line arguments.
+    while getopts "V" optopt; do
+        case $optopt in
+            V)  echo "X_NOTE_DIRECTORY : ${X_NOTE_DIRECTORY}"; return 0;;
+            \?) return 1;;
+        esac
+    done
+    shift $(( $OPTIND - 1 ))
+    
+    ## Get first element.
+    if test -n "$1"; then
+        sel1="$1"; shift
+    else
+        sel1="$(x_note_menu_1_d)"; test -n "${sel1}"
+    fi
+    
+    ## Create if specified.
+    if test @"${sel1}" = @"new"; then
+        sel1="$(dmenu -p 'Note file name:' < /dev/null | sed '\|[/\.]|d')"
+        test -n "${sel1}"
+        mkdir -p "${X_NOTE_DIRECTORY}"
+        touch "${X_NOTE_DIRECTORY}/${sel1}"
+    fi
+    file="${X_NOTE_DIRECTORY}/${sel1}"
+    
+    ## Fail if it does not exist.
+    if test ! -f "${file}"; then
+        dmenu_error "The file does not exist."
+        return 1
+    fi
+    
+    ## Operations.
+    if test -n "$1"; then
+        sel2="$1"; shift
+    else
+        sel2="$(x_note_menu_2_d "${sel1}")"
+        test -n "${sel2}"
+    fi
+    case "${sel2}" in
+        add)    x_note_add    "${file}" ;;
+        edit)   x_note_edit   "${file}" ;;
+        clip)   x_note_clip   "${file}" ;;
+        *)      dmenu_error "Unsupported operation."; return 1;;
+    esac
+    
+}
+## -------------------------------------------------------------------
+
+x_note_menu_1_d() {
+    if true; then
+        printf '%-20s : %s\n' 'new' 'New note'
+        if test -d "${X_NOTE_DIRECTORY}"; then
+            find "${X_NOTE_DIRECTORY}" -maxdepth 1 -mindepth 1 -type f -exec basename {} ';'
+        fi
+    fi  | dmenu -l 10 -p 'Select:' | sed 's| *:.*||' | sed '\|[/\.]|d'
+}
+x_note_menu_2_d() {
+    dmenu -l 10 -p "${1}:" <<-EOF | sed 's| *:.*||'
+	add    : Add note to it.
+	edit   : Edit in a text editor.
+	clip   : Clip a line from note file.
+	EOF
+}
+x_note_add() {
+    local txt="$(dmenu -p "$(basename "$1"): add:" < /dev/null)"
+    test -n "${txt}"
+    printf '%s\n' "${txt}" >> "${1}"
+}
+x_note_edit() {
+    x_editor "$1"
+}
+x_note_clip() {
+    dmenu -l 10 -p "$(basename "$1")" < "$1" | xclip 
+}
+## -------------------------------------------------------------------
+dmenu_error() { echo "$*" | dmenu -p 'x-note: error:'; }
+X_NOTE_DIRECTORY="${X_NOTE_DIRECTORY:-${HOME}/Documents/Notes}"
+if test @"$(basename "$0")" = @"x-note";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
+        *)         x_note "$@"; exit 0;;
+    esac
+fi

@@ -1,0 +1,86 @@
+#!/bin/sh -e
+##:
+#h: Usage: x-link -V | [CATEGORY [NAME]]
+#h:
+#h: Save your links in text format and access them using dmenu.
+#h:
+#h: File format   : NAME [ ; DESCRIPTION ] ; COMMAND
+#h: File location : ${X_LINK_DIRECTORY}/CATEGORY
+#x:
+#x: Dependencies: xdg-open, dmenu
+##:
+x_link() {
+    local OPTIND optopt category link command
+    
+    ## Parse command line arguments.
+    while getopts "V" optopt; do
+        case $optopt in
+            V)  echo "X_LINK_DIRECTORY : ${X_LINK_DIRECTORY}"; return 0;;
+            \?) return 1;;
+        esac
+    done
+    shift $(( $OPTIND - 1 ))
+    
+    ## Get category.
+    if test -n "$1"; then
+        category="$1"; shift
+    else
+        category="$(x_link_menu_category | dmenu -l 10 -p "Category:")"
+    fi
+    if test ! -n "${category}"; then
+        return 0
+    fi
+    
+    ## Get link.
+    link="$(x_link_menu_link "${category}" | dmenu -l 10 -p "Link:" | sed 's| *:.*||')"
+    if test ! -n "${link}"; then
+        return 0
+    fi
+    
+    ## Get command.
+    command="$(x_link_menu_command "${category}" "${link}")"
+    if test ! -n "${command}"; then
+        return 0
+    fi
+    
+    eval "${command}"
+}
+x_link_menu_category() {
+    if test -d "${X_LINK_DIRECTORY}"; then
+        find "${X_LINK_DIRECTORY}"         \
+             -maxdepth 1 -mindepth 1 \
+             -type f                 \
+             -exec basename '{}' ';'
+    fi
+}
+x_link_menu_link() {
+    local category="$1" a b c
+    if test ! -f "${X_LINK_DIRECTORY}/${category}"; then
+        dmenu -p "Category not found." </dev/null >/dev/null
+        return 1
+    fi
+    while IFS=';' read -r a b c; do
+        a="$(echo "${a}" | sed 's|^ *||;s| *$||')"
+        if test -n "${c}"; then
+            b="$(echo "${b}" | sed 's|^ *||;s| *$||')"
+            printf '%-20s : %s\n' "${a}" "${b}"
+        else
+            printf '%-20s : \n' "${a}"
+        fi
+    done < "${X_LINK_DIRECTORY}/${category}"
+}
+x_link_menu_command() {
+    local category="$1" link="$2" a b c
+    if test ! -f "${X_LINK_DIRECTORY}/${category}"; then
+        dmenu -p "Category not found." </dev/null >/dev/null
+        return 1
+    fi
+    sed -n "/^${link} *\;/s|.*\; *||p" "${X_LINK_DIRECTORY}/${category}"
+}
+X_LINK_DIRECTORY="${X_LINK_DIRECTORY:-${HOME}/Documents/Links}"
+if test @"$(basename "$0")" = @"x-link";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
+        *)         x_link "$@"; exit 0 ;;
+    esac
+fi

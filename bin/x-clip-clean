@@ -3,6 +3,8 @@
 #h: Usage: x-clip-clean
 #h:
 #h: Clean selection from trash.
+#x:
+#x: Dependencies: xclip
 ##:
 x_clip_clean() {
     local tmp="$(mktemp)"

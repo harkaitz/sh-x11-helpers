@@ -1,0 +1,96 @@
+#!/bin/sh -e
+##:
+#h: Usage: x-monitor PROGRAM ARGS...
+#h:
+#h: Execute program in the background in another xterm session. If
+#h: the file changes restart the program.
+#x:
+#x: Dependencies: xterm, notify-send(optional)
+##:
+x_monitor() {
+    ## Require a display.
+    if test ! -n "${DISPLAY}"; then
+        echo >&2 "error: The X11 display is not available."
+        return 1
+    fi
+    ## Check the program exists.
+    if test ! -x "${1}"; then
+        echo >&2 "error: ${1}: Not an executable."
+        return 1
+    fi
+    ## Bootstrap.
+    if test ! -n "${X_MONITOR_BOOTSTRAP}"; then
+        X_MONITOR_BOOTSTRAP=y xterm -iconic -T "X-MONITOR: ${1}" -e sh -e -c '. "$1"; shift; x_monitor "$@"' -- "$0" "$@" &
+        return 0
+    fi
+    ## Get program.
+    echo ""
+    echo "X-Monitor PID: $$"
+    echo ""
+    local program="$1" time1= time2= pid=; shift
+    quit=
+    
+    trap x_monitor_ctrl_c INT
+    trap x_monitor_ctrl_c TERM
+    trap x_monitor_ctrl_c QUIT
+    trap x_monitor_ctrl_c HUP
+    
+    ## Enter loop.
+    while true; do
+
+        ## Wait file modification.
+        time2="$(stat -c %Y "${program}")"
+        if test ! -n "${quit}" && test @"${time1}" = @"${time2}"; then
+            sleep 1 || true
+            continue
+        fi
+        time1="${time2}"
+
+        ## Kill program and wait.
+        if test -n "${pid}"; then
+            echo "Killing ${pid} ..."
+            kill "${pid}" >/dev/null 2>&1 || true
+            echo "Waiting ${pid} ..."
+            wait
+            ## Notify restart.
+            if test ! -n "${quit}"; then
+                x_monitor_notify "Restarting ${program} ..."
+            fi
+            pid=
+        fi
+
+        ## Break loop.
+        if test -n "${quit}"; then
+            x_monitor_notify "Exiting ${program} ..."
+            break
+        fi
+
+        
+        
+        ## Execute the program
+        clear
+        echo "======================================================="
+        echo "Executing ${program} $* ..."
+        echo "======================================================="
+        "${program}" "$@" &
+        pid="$!"
+        
+    done
+    
+}
+x_monitor_ctrl_c() {
+    echo ""
+    quit=y
+}
+x_monitor_notify() {
+    if which notify-send >/dev/null 2>&1; then
+        notify-send 'MONITOR' "${*}" --icon=dialog-information --transient --expire-time=1 || true
+    fi
+}
+
+if test @"$(basename "$0" 2>/dev/null || true)" = @"x-monitor";then
+    case "${1}" in
+        ''|-h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
+        *)            x_monitor "$@"; exit 0;;
+    esac
+fi

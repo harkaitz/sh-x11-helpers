@@ -1,0 +1,47 @@
+#!/bin/sh -e
+##:
+#h: Usage: x-editor [-V][-a] [FILE]
+#h:
+#h: Open file with an [-a : advanced] text editor.
+#h:
+#h: Environment variables: MEDITOR, XEDITOR
+#x:
+#x: Known text editors: xedit, mousepad, notepad, emacs
+##:
+x_editor() {
+    local OPTIND optopt advanced=
+    
+    ## Parse command line options.
+    while getopts "Va" optopt; do
+        case $optopt in
+            V)  x_editor_show_variables; return 0;;
+            a)  advanced="y";;
+            \?) return 1;;
+        esac
+    done
+    shift $(( $OPTIND - 1 ))
+    
+    ## Edit texts.
+    if test -n "${advanced}"; then
+        ${XEDITOR:-xdg-open} "$@"
+    else
+        ${MEDITOR:-xdg-open} "$@"
+    fi
+}
+x_editor_show_variables() {
+    echo "MEDITOR : ${MEDITOR}"
+    echo "XEDITOR : ${XEDITOR}"
+}
+x_editor_calc_variables() {
+    MEDITOR="${MEDITOR:-$(which xedit mousepad notepad  2>/dev/null | sed 1q )}"
+    XEDITOR="${XEDITOR:-$(which emacs "${XEDITOR_MINI}" 2>/dev/null | sed 1q )}"
+}
+## -------------------------------------------------------------------
+
+x_editor_calc_variables
+if test @"$(basename "$0")" = @"x-editor";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
+        *)         x_editor "$@"; exit 0;;
+    esac
+fi

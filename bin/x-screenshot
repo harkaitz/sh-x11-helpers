@@ -3,6 +3,8 @@
 #h: Usage: x-screenshot
 #h:
 #h: Select a window and take a screenshot.
+#x:
+#x: Dependencies: xdotool, xdg-open
 ##:
 x_screenshot() {
     local pngd="$(mktemp -d)"

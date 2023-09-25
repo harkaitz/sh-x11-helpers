@@ -23,14 +23,21 @@ install: install-sh
 install-sh:
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-clip-exec      $(DESTDIR)$(PREFIX)/bin
-	cp bin/x-phone          $(DESTDIR)$(PREFIX)/bin
+	cp bin/dmenu-fsel       $(DESTDIR)$(PREFIX)/bin
+	cp bin/x-clip-open      $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-clip-trans     $(DESTDIR)$(PREFIX)/bin
-	cp bin/x-record         $(DESTDIR)$(PREFIX)/bin
+	cp bin/x-wiki           $(DESTDIR)$(PREFIX)/bin
+	cp bin/x-monitor        $(DESTDIR)$(PREFIX)/bin
+	cp bin/x-editor         $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-auto           $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-clip-edit      $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-open           $(DESTDIR)$(PREFIX)/bin
+	cp bin/x-postit         $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-clip-pipe      $(DESTDIR)$(PREFIX)/bin
+	cp bin/xdg-pipe         $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-clip-clean     $(DESTDIR)$(PREFIX)/bin
+	cp bin/x-note           $(DESTDIR)$(PREFIX)/bin
+	cp bin/x-link           $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-color          $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-screenshot     $(DESTDIR)$(PREFIX)/bin
 ## -- BLOCK:sh --

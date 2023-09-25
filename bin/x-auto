@@ -4,6 +4,8 @@
 #h:
 #h: Define scripts in "/etc/x-auto" with X11 automatizations with
 #h: xdotool(1) and launch them with "x-auto".
+#x:
+#x: Dependencies: dmenu, xdotool
 ##:
 x_auto() {
     local OPTIND optopt n op=
@@ -31,7 +33,7 @@ x_auto_list() {
     done
 }
 ## -------------------------------------------------------------------
-X_AUTO_DIRECTORY="${X_AUTO_DIRECTORY:-${H}/etc/x-auto}"
+X_AUTO_DIRECTORY="${X_AUTO_DIRECTORY:-${HOME}/Documents/x-auto}"
 if test @"$(basename "$0")" = @"x-auto";then
     case "${1}" in
         -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;

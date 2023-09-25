@@ -1,0 +1,60 @@
+#!/bin/sh -e
+##:
+#h: Usage: dmenu-fsel [-n NAME][-C DIRECTORY][-c COMMAND,...]
+#h:
+#h: Select a file or a command using dmenu. The return value can
+#h: be: "file FILENAME" or "COMMAND DIRECTORY"
+#x:
+#x: Dependencies: dmenu
+##:
+dmenu_fsel() (
+    cmds='' msg="$(pwd)"
+    
+    ## Parse command line arguments.
+    while getopts "C:c:n:" optopt; do
+        case $optopt in
+            C)  cd "${OPTARG}";;
+            c)  cmds="${OPTARG}";;
+            n)  msg="${OPTARG}";;
+            \?) return 1;;
+        esac
+    done
+    shift $(( $OPTIND - 1 ))
+    
+    
+    pwd_basename="$(basename $(pwd))"
+    read -r type name <<-EOF
+	$(dmenu_fsel_list "${cmds}" | dmenu -l 10 -p "${msg}" | dmenu_type_path)
+	EOF
+    if test @"${type}" = @"d"; then
+        dmenu_fsel -C "${name}" -c "${cmds}" -n "${msg}/${name}"
+    elif test @"${type}" = @"c"; then
+        echo "${name} $(pwd)"
+    elif test @"${type}" = @"f"; then
+        echo "file $(pwd)/${name}"
+    fi
+    
+    
+)
+dmenu_fsel_list() {
+    local d f c
+    for c in $(echo "$1" | tr ',' ' '); do
+        printf '%-10s (c)\n' "${c}"
+    done
+    find . -maxdepth 1 -mindepth 1 -type d | while read -r d; do
+        printf '%-20s (d)\n' "$(basename "${d}")"
+    done
+    find . -maxdepth 1 -mindepth 1 -type f | while read -r f; do
+        printf '%-20s (f)\n' "$(basename "${f}")"
+    done
+}
+dmenu_type_path() {
+    sed 's|^\(.*\)  *(\([fdc]\))$|\2 \1|'
+}
+## -------------------------------------------------------------------
+if test @"$(basename "$0")" = @"dmenu-fsel";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
+        *)         dmenu_fsel "$@"; exit 0;;
+    esac
+fi

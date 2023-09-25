@@ -1,0 +1,41 @@
+#!/bin/sh -e
+##:
+#h: Usage: x-postit [-V][NOTE]
+#x:
+#x: Dependencies: dmenu, x-editor
+##:
+. dmenu-fsel
+. x-editor
+x_postit() {
+    local OPTIND optopt= ops=
+    
+    ## Parse command line arguments.
+    while getopts "V" optopt; do
+        case $optopt in
+            V)  x_postit_show_variables; return 0;;
+            \?) return 1;;
+        esac
+    done
+    shift $(( $OPTIND - 1 ))
+    
+    dmenu_fsel -n 'x-postit:' -C "${X_POSTIT_DIRECTORY}" -c 'new' | while read cmd loc; do
+        case "${cmd}" in
+            file) x_editor "${loc}";;
+            new)  x_editor "${loc}";;
+        esac
+    done
+}
+x_postit_show_variables() {
+    echo "X_POSTIT_DIRECTORY : ${X_POSTIT_DIRECTORY}"
+}
+x_postit_calc_variables() {
+    X_POSTIT_DIRECTORY="${X_POSTIT_DIRECTORY:-${HOME}/Documents/postit}"
+}
+## -------------------------------------------------------------------
+x_postit_calc_variables
+if test @"$(basename "$0")" = @"x-postit";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
+        *)         x_postit "$@"; exit 0;;
+    esac
+fi

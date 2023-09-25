@@ -1,0 +1,18 @@
+#!/bin/sh -e
+##:
+#h: Usage: x-clip-open
+#h:
+#h: Open the file in clipboard.
+#x:
+#x: Dependencies: x-open, xclip
+##:
+. x-open
+x_clip_open() {
+    x_open "$(xclip -selection "clipboard" -o)"
+}
+if test @"$(basename "$0")" = @"x-clip-open";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
+        *)         x_clip_open "$@"; exit 0;;
+    esac
+fi
