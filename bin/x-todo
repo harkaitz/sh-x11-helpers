@@ -1,0 +1,91 @@
+#!/bin/sh -e
+##:
+#h: Usage: x-todo ...
+#h:
+#h: Daily TODO task management utility.
+#h:
+#h:   -V : Show configuration.
+#h:   -E : Edit todo template list.
+#h:   -e : Open todo file.
+#h:   -a : Add todo lines from template.
+##:
+. x-editor
+x_todo() {
+    local OPTIND optopt opt_E= opt_e= opt_p= opt_a=
+    
+    ## Parse command line arguments.
+    while getopts "VEea" optopt; do
+        case $optopt in
+            V)  todo_show_variables; return 0;;
+            E)  opt_E=y;;
+            e)  opt_e=y;;
+            a)  opt_a=y;;
+            \?) return 1;;
+        esac
+    done
+    shift $(( $OPTIND - 1 ))
+    
+    ## Operations.
+    if test -n "${opt_E}"; then
+        x_editor "${TODO_LINES}"
+    fi
+    if test -n "${opt_e}${opt_a}"; then
+        x_todo_update
+    fi
+    if test -n "${opt_a}"; then
+        x_todo_add
+    elif test -n "${opt_e}"; then  
+        x_editor -a "${TODO_FILE}"
+    fi
+}
+x_todo_show_variables() {
+    echo "TODO_LINES : ${TODO_LINES}"
+    echo "TODO_FILE  : ${TODO_FILE}"
+    echo "TODO_DATE  : ${TODO_DATE}"
+}
+x_todo_calc_variables() {
+    TODO_LINES="${TODO_LINES:-${HOME}/TODO.lst}"
+    TODO_FILE="${TODO_FILE:-${HOME}/TODO.md}"
+    TODO_DATE="$(date '+%Y-%m-%d')"
+}
+## -------------------------------------------------------------------
+x_todo_update() {
+    local date=
+    if ! grep -q "^\#.*${TODO_DATE}" "${TODO_FILE}" 2>/dev/null; then
+        echo "## ${TODO_DATE}" >> "${TODO_FILE}"
+        echo ""                >> "${TODO_FILE}"
+    fi
+}
+x_todo_add() {
+    local tmp1="$(mktemp)" tmp2="$(mktemp)" tmp3="$(mktemp)" line
+    touch "${TODO_FILE}" "${TODO_LINES}"
+    
+    ## Get the missing lines.
+    sed -n "/^\\#.*${TODO_DATE}.*/,\$p" "${TODO_FILE}" > "${tmp1}"
+    while read -r line; do
+        if ! grep -qF "${line}" "${tmp1}"; then
+            echo "- [ ] ${line}" >> "${tmp2}"
+        fi
+    done < "${TODO_LINES}"
+    cp "${tmp2}" "${tmp3}"
+    
+    
+    ## Edit lines to enter.
+    x-editor "${tmp2}"
+
+    ## Update.
+    cat "${tmp2}" >> "${TODO_FILE}"
+    dos2unix "${TODO_FILE}"
+    rm -f "${tmp1}" "${tmp2}" "${tmp3}"
+
+    ## Edit.
+    x_editor -a "${TODO_FILE}"
+}
+## -------------------------------------------------------------------
+x_todo_calc_variables
+if test @"$(basename "$0")" = @"x-todo";then
+    case "${1}" in
+        ''|-h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
+        *)            x_todo "$@"; exit 0;;
+    esac
+fi

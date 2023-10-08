@@ -44,6 +44,7 @@ x_link() {
     fi
     
     eval "${command}"
+    wait
 }
 x_link_menu_category() {
     if test -d "${X_LINK_DIRECTORY}"; then
@@ -51,7 +52,7 @@ x_link_menu_category() {
              -maxdepth 1 -mindepth 1 \
              -type f                 \
              -exec basename '{}' ';'
-    fi
+    fi | sort -u
 }
 x_link_menu_link() {
     local category="$1" a b c

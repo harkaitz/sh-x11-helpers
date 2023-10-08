@@ -89,7 +89,7 @@ x_note_clip() {
 ## -------------------------------------------------------------------
 dmenu_error() { echo "$*" | dmenu -p 'x-note: error:'; }
 X_NOTE_DIRECTORY="${X_NOTE_DIRECTORY:-${HOME}/Documents/Notes}"
-if test @"$(basename "$0")" = @"x-note";then
+if test @"$(basename "$0")" = @"x-note"; then
     case "${1}" in
         -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
         *)         x_note "$@"; exit 0;;

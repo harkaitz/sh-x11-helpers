@@ -1,0 +1,76 @@
+#!/bin/sh -e
+##:
+#h: Usage: x-keyboard OPS...
+#h:
+#h: Configure keyboard shortcuts for XFCE.
+#h:
+#h:   -V  : Show configuration.
+#h:   -l  : List keyboard shortcuts.
+#h:   -iX : Install XFCE keyboard shortcuts.
+#h:
+#h: Environment variables: X_KEYBOARD
+##:
+x_keyboard() {
+    local OPTIND optopt ops=
+    
+    ## Parse command line arguments.
+    while getopts "VliX" optopt; do
+        ops="${ops}${optopt}"
+        case $optopt in
+            \?) return 1;;
+        esac
+    done
+    shift $(( $OPTIND - 1 ))
+    
+    ## Operations.
+    case "${ops}" in *V*)   echo "X_KEYBOARD : ${X_KEYBOARD}";; esac
+    case "${ops}" in *l*)   x_keyboard_list                  ;; esac
+    case "${ops}" in *i*)   x_keyboard_install               ;; esac
+    case "${ops}" in *i*X*) x_keyboard_install_xfce          ;; esac
+}
+x_keyboard_list() {
+    if test -e "${X_KEYBOARD}"; then
+        cat "${X_KEYBOARD}"
+    fi
+}
+x_keyboard_install() {
+    local d="${HOME}/.local/kbin"
+    
+    mkdir -p "${d}"
+    x_keyboard_list | while read -r terminal shortcut command
+    do
+        echo "Creating ${d}/${terminal} ..." >&2
+        cat > "${d}/${terminal}" <<-EOF
+	#!/bin/sh -e
+	if test -e /etc/profile2; then
+	    . /etc/profile2
+	fi
+	(
+	    ${command}
+	) >/dev/null 2>&1 </dev/null
+	EOF
+        chmod +x "${d}/${terminal}"
+        printf '%-10s %s\n' "${shortcut}" "${d}/${terminal}"
+    done > ~/.x-keyboard.tmp
+}
+## -------------------------------------------------------------------
+x_keyboard_install_xfce() {
+    while read -r shortcut script; do
+        echo "Attaching '${shortcut}' to '${script}' ..." >&2
+        xfconf-query                          \
+            -c xfce4-keyboard-shortcuts       \
+            -n -t 'string'                    \
+            -p "/commands/custom/${shortcut}" \
+            -s "${script}"
+    done < ~/.x-keyboard.tmp
+}
+
+
+## -------------------------------------------------------------------
+X_KEYBOARD="${X_KEYBOARD:-${HOME}/.x-keyboard}"
+if test @"$(basename "$0")" = @"x-keyboard"; then
+    case "${1}" in
+        ''|-h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
+        *)            x_keyboard "$@"; exit 0           ;;
+    esac
+fi

@@ -1,0 +1,60 @@
+#!/bin/sh -e
+##:
+#h: Usage: x-menu [-Vl]
+#h:
+#h: Show a menu with dmenu of a selection of commands in "~/.x-menu".
+#h:
+#h: The list follows the following convention: "CMD : DESC [{w,f,t}]".
+#h: - w : Commands that window themselves.
+#h: - f : Command line programs, keep xterm open 2 seconds after finishing.
+#h: - t : Wait an enter after finishing.
+#h:
+#h: Environment variables: X_MENU
+##:
+x_menu() {
+    local OPTIND optopt line cmd type
+    
+    ## Parse command line arguments.
+    while getopts "Vl" optopt; do
+        case $optopt in
+            V)  echo "X_MENU : ${X_MENU}"; return 0;;
+            l)  test ! -e "${X_MENU}" || cat "${X_MENU}"; return 0;;
+            \?) return 1;;
+        esac
+    done
+    shift $(( $OPTIND - 1 ))
+    
+    ## Skip list.
+    if test ! -e "${X_MENU}"; then
+        echo "Empty list" | dmenu -p 'x-menu:'
+        return 0
+    fi
+    
+    ## Select command.
+    line="$(dmenu -l 10 < ${X_MENU})"
+    test -n "${line}"
+    cmd="$(  echo "${line}" | sed    's| *:.*||'             )"
+    type="$( echo "${line}" | sed -n 's|.*\[\(.\)\].*|\1|p'  )"
+    test -n "${cmd}"
+    cmd="
+        export HLOOP_BREAK=y
+        if ${cmd}; then
+            echo SUCCESS
+        else
+            echo FAILURE
+        fi
+    "
+    case "${type:-t}" in
+        w) sh -e -c "${cmd}";;
+        f) xterm -e sh -e -c "${cmd}sleep 2"; ;;
+        t) xterm -e sh -e -c "${cmd}read ign";;
+    esac
+}
+## -------------------------------------------------------------------
+X_MENU="${X_MENU:-${HOME}/.x-menu}"
+if test @"$(basename "$0")" = @"x-menu";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
+        *)         x_menu "$@"; exit 0;;
+    esac
+fi

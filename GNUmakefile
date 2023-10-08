@@ -23,8 +23,10 @@ install: install-sh
 install-sh:
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-clip-exec      $(DESTDIR)$(PREFIX)/bin
+	cp bin/x-todo           $(DESTDIR)$(PREFIX)/bin
 	cp bin/dmenu-fsel       $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-clip-open      $(DESTDIR)$(PREFIX)/bin
+	cp bin/x-report         $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-clip-trans     $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-wiki           $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-monitor        $(DESTDIR)$(PREFIX)/bin
@@ -36,6 +38,7 @@ install-sh:
 	cp bin/x-clip-pipe      $(DESTDIR)$(PREFIX)/bin
 	cp bin/xdg-pipe         $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-clip-clean     $(DESTDIR)$(PREFIX)/bin
+	cp bin/x-menu           $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-note           $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-link           $(DESTDIR)$(PREFIX)/bin
 	cp bin/x-color          $(DESTDIR)$(PREFIX)/bin

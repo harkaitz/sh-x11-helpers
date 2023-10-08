@@ -1,0 +1,91 @@
+#!/bin/sh -e
+##:
+#h: Usage: x_report [-nl] [NOTE]
+#h:
+#h: Directories: "$X_REPORT_DIR", "~/Documents/Notes"
+##:
+x_report() {
+    local OPTIND optopt note opt_n= opt_l=
+    
+    ## Parse command line arguments.
+    while getopts "Vnl" optopt; do
+        case $optopt in
+            V)  echo "X_REPORT_DIR : ${X_REPORT_DIR}"; return 0;;
+            n)  opt_n=y;;
+            l)  opt_l=y;;
+            \?) return 1;;
+        esac
+    done
+    shift $(( $OPTIND - 1 ))
+
+    ## Terminal interface.
+    if test -n "${opt_n}"; then
+        if test ! -n "${1}"; then
+            echo >&2 "error: Please specify a note name."
+            return 1
+        fi
+        x_report_new  "${1}"
+        x_report_edit "${1}"
+        return 0
+    elif test -n "${opt_l}"; then
+        x_report_list
+        return 0
+    elif test -n "${1}"; then
+        x_report_edit "${1}"
+        return 0
+    fi
+
+    ## X interface.
+    if test ! -n "${1}${opt_n}${opt_l}"; then
+        note="$(x_report_list_x11 | dmenu -p 'x-report' -l 10)"
+        test -n "${note}"
+        if test @"${note}" = @"new"; then
+            note="$(dmenu -p 'x-report/new' -l 1 </dev/null)"
+            test -n "${note}"
+            x_report_new "${note}"
+        fi
+        x_report_edit "${note}"
+    fi
+    
+}
+## -------------------------------------------------------------------
+x_report_list_x11() {
+    echo "new"
+    x_report_list
+}
+
+## -------------------------------------------------------------------
+x_report_list() {
+    local pwd="$(pwd)"
+    if test -d "${X_REPORT_DIR}"; then
+        cd "${X_REPORT_DIR}"
+        find . -type f | sed 's|^\./||'
+        cd "${pwd}"
+    fi
+}
+x_report_new() {
+    local note_f="${X_REPORT_DIR}/${1}"
+    local note_d="$(dirname "${note_f}")"
+    mkdir -p "${note_d}"
+    touch "${note_f}"
+}
+x_report_edit() {
+    local note_f="${X_REPORT_DIR}/${1}"
+    if test ! -f "${note_f}"; then
+        echo >&2 "error: ${1}: The note does not exist."
+        return 1
+    fi
+    if which x-editor >/dev/null 2>&1; then
+        x-editor "${note_f}" &
+    else
+        ${EDITOR:-vi} "${note_f}"
+    fi   
+}
+## -------------------------------------------------------------------
+X_REPORT_DIR="${X_REPORT_DIR:-${HOME}/Documents/Notes}"
+if test @"$(basename "$0")" = @"x-report";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
+        *)         x_report "$@"; exit 0;;
+    esac
+fi

@@ -1,7 +1,7 @@
 # X11 HELPERS
 
 Small utilities for the X11 desktop. It requires dmenu(1) and X11
-utilities.
+utilities. I use this scripts for personal productivity.
 
 ## Help
 
@@ -101,6 +101,18 @@ x-editor
     
     Known text editors: xedit, mousepad, notepad, emacs
 
+x-keyboard
+
+    Usage: x-keyboard OPS...
+    
+    Configure keyboard shortcuts for XFCE.
+    
+      -V  : Show configuration.
+      -l  : List keyboard shortcuts.
+      -iX : Install XFCE keyboard shortcuts.
+    
+    Environment variables: X_KEYBOARD
+
 x-link
 
     Usage: x-link -V | [CATEGORY [NAME]]
@@ -111,6 +123,19 @@ x-link
     File location : ${X_LINK_DIRECTORY}/CATEGORY
     
     Dependencies: xdg-open, dmenu
+
+x-menu
+
+    Usage: x-menu [-Vl]
+    
+    Show a menu with dmenu of a selection of commands in "~/.x-menu".
+    
+    The list follows the following convention: "CMD : DESC [{w,f,t}]".
+    - w : Commands that window themselves.
+    - f : Command line programs, keep xterm open 2 seconds after finishing.
+    - t : Wait an enter after finishing.
+    
+    Environment variables: X_MENU
 
 x-monitor
 
@@ -150,6 +175,12 @@ x-postit
     
     Dependencies: dmenu, x-editor
 
+x-report
+
+    Usage: x_report [-nl] [NOTE]
+    
+    Directories: "$X_REPORT_DIR", "~/Documents/X_Report"
+
 x-screenshot
 
     Usage: x-screenshot
@@ -157,6 +188,21 @@ x-screenshot
     Select a window and take a screenshot.
     
     Dependencies: xdotool, xdg-open
+
+x-search
+
+    Usage: x-search [TERM]
+
+x-todo
+
+    Usage: x-todo ...
+    
+    Daily TODO task management utility.
+    
+      -V : Show configuration.
+      -E : Edit todo template list.
+      -e : Open todo file.
+      -a : Add todo lines from template.
 
 x-wiki
 
