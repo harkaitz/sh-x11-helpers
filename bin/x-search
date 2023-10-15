@@ -1,6 +1,11 @@
 #!/bin/sh -e
 ##:
 #h: Usage: x-search [TERM]
+#h:
+#h: Show a list of searchers (x-search--NAME commands) and search
+#h: the term in clipboard.
+#x:
+#x: Dependencies: xclip, dmenu, xdg-open
 ##:
 x_search() {
     local engine term="$*"

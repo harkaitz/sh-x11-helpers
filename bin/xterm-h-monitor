@@ -1,13 +1,13 @@
 #!/bin/sh -e
 ##:
-#h: Usage: x-monitor PROGRAM ARGS...
+#h: Usage: xterm-h-monitor PROGRAM ARGS...
 #h:
 #h: Execute program in the background in another xterm session. If
 #h: the file changes restart the program.
 #x:
 #x: Dependencies: xterm, notify-send(optional)
 ##:
-x_monitor() {
+xterm_h_monitor() {
     ## Require a display.
     if test ! -n "${DISPLAY}"; then
         echo >&2 "error: The X11 display is not available."
@@ -88,9 +88,9 @@ x_monitor_notify() {
     fi
 }
 
-if test @"$(basename "$0" 2>/dev/null || true)" = @"x-monitor";then
+if test @"$(basename "$0" 2>/dev/null || true)" = @"xterm-h-monitor";then
     case "${1}" in
         ''|-h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
-        *)            x_monitor "$@"; exit 0;;
+        *)            xterm_h_monitor "$@"; exit 0;;
     esac
 fi

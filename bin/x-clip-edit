@@ -1,12 +1,10 @@
 #!/bin/sh -e
 ##:
-#h: Usage: x-clip-edit
-#h:
-#h: Edit clipboard content.
+#h: Usage: x-clip-edit : Edit clipboard content.
 #x:
 #x: Dependencies: xclip
 ##:
-x-editor
+. x-editor
 x_clip_edit() {
     local tmp="$(mktemp)"
     xclip -selection "clipboard" -o > "${tmp}" || true

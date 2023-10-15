@@ -1,7 +1,8 @@
 #!/bin/sh -e
 ##:
 #h: Usage: x-postit [-V][NOTE]
-#x:
+#h:
+#h: Environment variables: X_POSTIT_DIRECTORY
 #x: Dependencies: dmenu, x-editor
 ##:
 . dmenu-fsel
@@ -24,7 +25,6 @@ x_postit() {
         return 0
     fi
 
-    
     dmenu_fsel -n 'x-postit:' -C "${X_POSTIT_DIRECTORY}" -c 'new' | while read cmd loc; do
         case "${cmd}" in
             file) x_editor "${loc}";;

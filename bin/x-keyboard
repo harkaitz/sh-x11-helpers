@@ -2,7 +2,8 @@
 ##:
 #h: Usage: x-keyboard OPS...
 #h:
-#h: Configure keyboard shortcuts for XFCE.
+#h: Configure keyboard shortcuts for desktop environments. For now
+#h: only XFCE is supported.
 #h:
 #h:   -V  : Show configuration.
 #h:   -l  : List keyboard shortcuts.

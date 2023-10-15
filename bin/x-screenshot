@@ -4,7 +4,7 @@
 #h:
 #h: Select a window and take a screenshot.
 #x:
-#x: Dependencies: xdotool, xdg-open
+#x: Dependencies: xdotool, xdg-open, import(ImageMagick).
 ##:
 x_screenshot() {
     local pngd="$(mktemp -d)"

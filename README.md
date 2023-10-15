@@ -18,24 +18,15 @@ x-auto
 
     Usage: x-auto -V
     
-    Define scripts in "/etc/x-auto" with X11 automatizations with
+    Define scripts in "~/Documents/x-auto" with X11 automatizations with
     xdotool(1) and launch them with "x-auto".
     
+    Environment variables: X_AUTO_DIRECTORY
     Dependencies: dmenu, xdotool
-
-x-clip-clean
-
-    Usage: x-clip-clean
-    
-    Clean selection from trash.
-    
-    Dependencies: xclip
 
 x-clip-edit
 
-    Usage: x-clip-edit
-    
-    Edit clipboard content.
+    Usage: x-clip-edit : Edit clipboard content.
     
     Dependencies: xclip
 
@@ -49,11 +40,9 @@ x-clip-exec
 
 x-clip-open
 
-    Usage: x-clip-open
+    Usage: x-clip-open : Open the file in clipboard.
     
-    Open the file in clipboard.
-    
-    Dependencies: x-open, xclip
+    Dependencies: xclip
 
 x-clip-pipe
 
@@ -67,11 +56,10 @@ x-clip-pipe
 
 x-clip-trans
 
-    Usage: x-clip-trans
+    Usage: x-clip-trans : Translate the text inside the clipboard.
     
-    Translate the text inside the clipboard.
-    
-    Dependencies: xclip, xmessage
+    Environment variables: X_LANGUAGES
+    Dependencies: xclip, xmessage, trans(1)
 
 x-color
 
@@ -82,15 +70,6 @@ x-color
     
     Dependencies: xclip, grabc
 
-xdg-pipe
-
-    Usage: xdg-pipe [-s SUFFIX][-p PROGRAM] < FILE
-    
-    Read from the standard input to a temporary file, and
-    then open with `xdg-open(1)` or another program.
-    
-    Dependencies: xdg-pipe, xdg-open
-
 x-editor
 
     Usage: x-editor [-V][-a] [FILE]
@@ -98,14 +77,14 @@ x-editor
     Open file with an [-a : advanced] text editor.
     
     Environment variables: MEDITOR, XEDITOR
-    
     Known text editors: xedit, mousepad, notepad, emacs
 
 x-keyboard
 
     Usage: x-keyboard OPS...
     
-    Configure keyboard shortcuts for XFCE.
+    Configure keyboard shortcuts for desktop environments. For now
+    only XFCE is supported.
     
       -V  : Show configuration.
       -l  : List keyboard shortcuts.
@@ -136,25 +115,20 @@ x-menu
     - t : Wait an enter after finishing.
     
     Environment variables: X_MENU
-
-x-monitor
-
-    Usage: x-monitor PROGRAM ARGS...
-    
-    Execute program in the background in another xterm session. If
-    the file changes restart the program.
-    
-    Dependencies: xterm, notify-send(optional)
+    Dependencies: dmenu, xterm
 
 x-note
 
     Usage: x-note -V | ...
+    
+    Take fast notes for later read.
     
     ... n NAME      : Create new notes file.
     ... NAME d      : Delete notes file.
     ... NAME a TAKE : Add new take.
     ... NAME p      : Print take (and copy to clipboard)
     
+    Environment variables: X_NOTE_DIRECTORY (~/Documents/Notes)
     Dependencies: dmenu, x-editor
 
 x-open
@@ -173,13 +147,14 @@ x-postit
 
     Usage: x-postit [-V][NOTE]
     
+    Environment variables: X_POSTIT_DIRECTORY
     Dependencies: dmenu, x-editor
 
 x-report
 
     Usage: x_report [-nl] [NOTE]
     
-    Directories: "$X_REPORT_DIR", "~/Documents/X_Report"
+    Directories: "$X_REPORT_DIR", "~/Documents/Notes"
 
 x-screenshot
 
@@ -187,11 +162,25 @@ x-screenshot
     
     Select a window and take a screenshot.
     
-    Dependencies: xdotool, xdg-open
+    Dependencies: xdotool, xdg-open, import(ImageMagick).
 
 x-search
 
     Usage: x-search [TERM]
+    
+    Show a list of searchers (x-search--NAME commands) and search
+    the term in clipboard.
+    
+    Dependencies: xclip, dmenu, xdg-open
+
+xterm-h-monitor
+
+    Usage: xterm-h-monitor PROGRAM ARGS...
+    
+    Execute program in the background in another xterm session. If
+    the file changes restart the program.
+    
+    Dependencies: xterm, notify-send(optional)
 
 x-todo
 
@@ -203,6 +192,8 @@ x-todo
       -E : Edit todo template list.
       -e : Open todo file.
       -a : Add todo lines from template.
+    
+    Environment variables: TODO_LINES, TODO_FILE
 
 x-wiki
 

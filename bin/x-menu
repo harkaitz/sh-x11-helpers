@@ -10,6 +10,7 @@
 #h: - t : Wait an enter after finishing.
 #h:
 #h: Environment variables: X_MENU
+#x: Dependencies: dmenu, xterm
 ##:
 x_menu() {
     local OPTIND optopt line cmd type

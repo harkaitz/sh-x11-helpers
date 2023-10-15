@@ -1,10 +1,9 @@
 #!/bin/sh -e
 ##:
-#h: Usage: x-clip-trans
+#h: Usage: x-clip-trans : Translate the text inside the clipboard.
 #h:
-#h: Translate the text inside the clipboard.
-#x:
-#x: Dependencies: xclip, xmessage
+#h: Environment variables: X_LANGUAGES
+#x: Dependencies: xclip, xmessage, trans(1)
 ##:
 x_clip_trans() {
     
@@ -35,7 +34,6 @@ x_clip_trans() {
 	
 	$(cat "${tmp1}")
 	EOF
-    
     
     ## Open with text editor.
     xmessage -nearmouse -buttons quit:0 -default quit -file "${tmp3}"

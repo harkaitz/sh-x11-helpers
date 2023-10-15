@@ -8,6 +8,8 @@
 #h:   -E : Edit todo template list.
 #h:   -e : Open todo file.
 #h:   -a : Add todo lines from template.
+#h:
+#h: Environment variables: TODO_LINES, TODO_FILE
 ##:
 . x-editor
 x_todo() {

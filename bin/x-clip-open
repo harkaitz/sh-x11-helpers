@@ -1,10 +1,8 @@
 #!/bin/sh -e
 ##:
-#h: Usage: x-clip-open
-#h:
-#h: Open the file in clipboard.
+#h: Usage: x-clip-open : Open the file in clipboard.
 #x:
-#x: Dependencies: x-open, xclip
+#x: Dependencies: xclip
 ##:
 . x-open
 x_clip_open() {

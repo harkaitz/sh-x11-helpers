@@ -2,12 +2,16 @@
 ##:
 #h: Usage: x-note -V | ...
 #h:
+#h: Take fast notes for later read.
+#h:
 #h: ... n NAME      : Create new notes file.
 #h: ... NAME d      : Delete notes file.
 #h: ... NAME a TAKE : Add new take.
 #h: ... NAME p      : Print take (and copy to clipboard)
-#x:
+#h:
+#h: Environment variables: X_NOTE_DIRECTORY (~/Documents/Notes)
 #x: Dependencies: dmenu, x-editor
+##:
 . x-editor
 x_note() {
     local OPTIND optopt sel1 sel2 file

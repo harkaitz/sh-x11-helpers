@@ -2,9 +2,10 @@
 ##:
 #h: Usage: x-auto -V
 #h:
-#h: Define scripts in "/etc/x-auto" with X11 automatizations with
+#h: Define scripts in "~/Documents/x-auto" with X11 automatizations with
 #h: xdotool(1) and launch them with "x-auto".
-#x:
+#h:
+#h: Environment variables: X_AUTO_DIRECTORY
 #x: Dependencies: dmenu, xdotool
 ##:
 x_auto() {
