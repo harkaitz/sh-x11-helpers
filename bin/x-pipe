@@ -1,0 +1,45 @@
+#!/bin/sh -e
+##:
+#h: Usafe: x-clip [COMMAND]
+#h:
+#h: Pipe the content in the clipboard to command and put it's output
+#h: in the clipboard. If no command is specified it is asked with
+#h: dmenu.
+#x:
+#x: Dependencies: xclip, dmenu
+##:
+. x-compat
+x_pipe() {
+    if test -n "$1"; then
+        local cmd="$*"
+    else
+        local cmd="$(x_pipe_list | dmenu -p 'Command:')"
+        test -n "${cmd}"
+        mkdir -p ~/.hist
+        echo "${cmd}" > ~/.hist/x-clip-pipe
+    fi
+    local tmp="$(mktemp)"
+    x_compat clip-get | X_PIPE=y sh -ec "${cmd}" 2> "${tmp}" | x_compat clip-put
+    if test ! @"$(wc -l < "${tmp}")" = @"0"; then
+        x_compat error "${cmd}" "$(cat "${tmp}")"
+    fi
+}
+x_pipe_list() {
+    if test -e ~/.hist/x-clip-pipe; then
+        cat ~/.hist/x-clip-pipe
+        x_compat progs 'txt-' | grep -Fv -f ~/.hist/x-clip-pipe
+    else
+        x_compat progs 'txt-'
+    fi
+    
+}
+## -------------------------------------------------------------------
+
+
+## -------------------------------------------------------------------
+if test @"$(basename "$0")" = @"x-pipe";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
+        *)         x_pipe "$@"; exit 0;;
+    esac
+fi

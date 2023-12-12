@@ -25,35 +25,85 @@ x_menu() {
     done
     shift $(( $OPTIND - 1 ))
     
-    ## Skip list.
-    if test ! -e "${X_MENU}"; then
-        echo "Empty list" | dmenu -p 'x-menu:'
-        return 0
-    fi
-    
     ## Select command.
-    line="$(dmenu -l 10 < ${X_MENU})"
+    line="$(x_menu_list | dmenu -l 10)"
     test -n "${line}"
+    
+    ## Extract command.
+    echo "${line}" > ~/.x-menu.last
     cmd="$(  echo "${line}" | sed    's| *:.*||'             )"
     type="$( echo "${line}" | sed -n 's|.*\[\(.\)\].*|\1|p'  )"
     test -n "${cmd}"
-    cmd="
-        export HLOOP_BREAK=y
-        if ${cmd}; then
-            echo SUCCESS
-        else
-            echo FAILURE
-        fi
-    "
+    
+    ## Execute.
     case "${type:-t}" in
-        w) sh -e -c "${cmd}";;
-        f) xterm -e sh -e -c "${cmd}sleep 2"; ;;
-        t) xterm -e sh -e -c "${cmd}read ign";;
+        w) eval        "${cmd}";;
+        t) x_menu_exec "${cmd}";;
     esac
 }
+x_menu_list() {
+    
+    if test -e ~/.x-menu.last; then
+        cat ~/.x-menu.last
+    fi
+    if test -f "${X_MENU}"; then
+        cat "${X_MENU}"
+    fi
+    if test -e ~/.x-menu.last; then
+        grep -Fv -f ~/.x-menu.last
+    else
+        cat
+    fi <<-EOF
+	x-search        : Search term in search engines. [w]
+	x-pipe          : Pipe selection through command. [w]
+	x-link          : Open bookmarks. [w]
+	x-link -e       : Edit bookmarks. [w]
+	EOF
+}
 ## -------------------------------------------------------------------
+## ---- COPIED FROM X-COMPAT FOR EFFICIENCY --------------------------
+## -------------------------------------------------------------------
+x_menu_exec() {
+    local tmp="$(mktemp)"
+    cat > "${tmp}" <<-EOF
+	export X_MENU=y
+	main() (
+	    $*
+	)
+	if main; then
+	    echo SUCCESS
+	else
+	    echo FAILURE
+	fi
+	read ign
+	EOF
+    if which sh.exe >/dev/null 2>&1; then
+        cmd.exe /C "start /wait sh.exe -e ${tmp}"
+    else
+        xterm -e sh -e "${tmp}"
+    fi
+}
+dmenu() {
+    if which wlines.exe >/dev/null 2>&1; then
+        # https://github.com/JerwuQu/wlines
+        if which nircmd >/dev/null 2>&1; then
+            nircmd movecursor -2000 -2000
+            nircmd movecursor 20 20
+        fi
+        wlines "$@"
+    elif which dmenu >/dev/null 2>&1; then
+        env dmenu "$@"
+    else
+        echo >&2 "error: Please install wlines or dmenu."
+        return 1
+    fi
+}
+## -------------------------------------------------------------------
+case "$(uname -o)" in
+    MS/Windows) export PATH="$(dirname $0);${PATH}";;
+esac
 X_MENU="${X_MENU:-${HOME}/.x-menu}"
-if test @"$(basename "$0")" = @"x-menu";then
+if test @"$(basename "$0")" = @"x-menu"; then
     case "${1}" in
         -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
         *)         x_menu "$@"; exit 0;;

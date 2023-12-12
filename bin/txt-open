@@ -1,0 +1,18 @@
+#!/bin/sh -e
+##:
+#h: Usage: txt-open < FILENAME
+#h:
+#h: Read filenames from standard input and open with x-open(1).
+##:
+. x-compat
+. x-open
+txt_open() {
+    x_open "$(cat)"
+}
+## -------------------------------------------------------------------
+if test @"$(basename "$0")" = @"txt-open"; then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
+        *)         txt_open "$@"; exit 0;;
+    esac
+fi

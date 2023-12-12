@@ -1,0 +1,110 @@
+#!/bin/sh -e
+##:
+#h: Usage: x-compat ...
+#h:
+#h: ... clip-get          : Print text in clipboard.
+#h: ... clip-put          : Save to clipboard.
+#h: ... exec CODE         : Execute code from standard input.
+#h: ... dmenu [-p PROMPT] :
+#h: ... error HEAD MSG    :
+#h: ... progs REGEX       : List programs that match REGEX.
+##:
+x_compat() {
+    local cmd="$1"
+    shift
+    case "${cmd}" in
+        'clip-get') x_compat_clip_get       ;;
+        'clip-put') x_compat_clip_put       ;;
+        'exec')     x_compat_clip_exec "$*" ;;
+        'dmenu')    dmenu "$@"              ;;
+        'error')    x_compat_error "$@"     ;;
+        'progs')    x_compat_progs "$@"     ;;
+    esac
+}
+## -------------------------------------------------------------------
+x_compat_clip_get() {
+    if which clip.exe >/dev/null 2>&1; then
+        local t="${TEMP:-/tmp}/clipa.vbs"
+        echo 'x = CreateObject("htmlfile").ParentWindow.ClipboardData.GetData("text")' > "$t"
+        echo 'WScript.Echo x'                                                         >> "$t"
+        cscript //nologo "$t"
+    elif which xclip >/dev/null 2>&1; then
+        xclip -selection "clipboard" -o
+    else
+        echo >&2 "error: Please install xclip or clip."
+        return 1
+    fi
+}
+x_compat_clip_put() {
+    if which clip.exe >/dev/null 2>&1; then
+        clip.exe
+    elif which xclip >/dev/null 2>&1; then
+        xclip -selection "clipboard" -i
+    else
+        echo >&2 "error: Please install xclip or clip."
+        return 1
+    fi
+}
+x_compat_clip_exec() {
+    local tmp="$(mktemp)"
+    cat > "${tmp}" <<-EOF
+	main() (
+	    $*
+	)
+	if main; then
+	    echo SUCCESS
+	else
+	    echo FAILURE
+	fi
+	read ign
+	EOF
+    if which sh.exe >/dev/null 2>&1; then
+        cmd.exe /C "start /wait sh.exe -e ${tmp}"
+    else
+        xterm -e sh -e "${tmp}"
+    fi
+}
+dmenu() {
+    if which wlines.exe >/dev/null 2>&1; then
+        # https://github.com/JerwuQu/wlines
+        if which nircmd >/dev/null 2>&1; then
+            nircmd movecursor -2000 -2000
+            nircmd movecursor 20 20
+        fi
+        wlines "$@"
+    elif which dmenu >/dev/null 2>&1; then
+        env dmenu "$@"
+    else
+        echo >&2 "error: Please install wlines or dmenu."
+        return 1
+    fi
+}
+x_compat_error() {
+    local msg="$1"; shift
+    if which nircmd >/dev/null 2>&1; then
+        nircmd infobox "$*" "$msg"
+    else
+        echo "$*" | dmenu -p "${msg}: error:"
+    fi
+}
+x_compat_progs() {
+    local d
+    case "$(uname -o)" in
+        MS/Windows) local IFS=';';;
+        *)          local IFS=':';;
+    esac
+    for d in ${PATH}; do
+        if test ! -d "${d}"; then
+            continue
+        fi
+        ls "${d}"
+    done | sed -n "/^${1}/p"
+    
+}
+## -------------------------------------------------------------------
+if test @"$(basename "$0")" = @"x-compat"; then
+    case "${1}" in
+        ''|-h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
+        *)            x_compat "$@"; exit 0;;
+    esac
+fi

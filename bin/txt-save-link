@@ -1,0 +1,36 @@
+#!/bin/sh -e
+##:
+#h: Usage: txt-save-link [NAME] < LINK
+#h:
+#h: Save link to "last" link file for x-link(1).
+##:
+. x-link
+. x-compat
+txt_save_link() {
+    local name url
+    if test -n "$1"; then
+        name="$1"
+    elif test -n "${X_PIPE}"; then
+        name="$(echo '' | x-compat dmenu -p "Link name: ")"
+        test -n "${name}"
+    else
+        echo >&2 "error: Please specify a name."
+    fi
+    read url
+    case "${url}" in
+        *://*)
+            mkdir -p "${X_LINK_DIRECTORY}"
+            echo "${name} ; x-open ${url}" >> "${X_LINK_DIRECTORY}/last"
+            ;;
+        *)
+            x_compat error "It is not a link" "${url}"
+            ;;
+    esac
+}
+## -------------------------------------------------------------------
+if test @"$(basename "$0")" = @"txt-save-link"; then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
+        *)         txt_save_link "$@"; exit 0        ;;
+    esac
+fi

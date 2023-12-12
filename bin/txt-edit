@@ -1,0 +1,22 @@
+#!/bin/sh -e
+##:
+#h: Usage: txt-edit < INPUT > OUTPUT
+#h:
+#h: Read from the standard input, edit and print to standard output.
+##:
+. x-compat
+. x-editor
+txt_edit() {
+    local tmp="$(mktemp)"
+    cat > "${tmp}"
+    x_editor "${tmp}"
+    cat "${tmp}"
+    rm -f "${tmp}"
+}
+## -------------------------------------------------------------------
+if test @"$(basename "$0")" = @"txt-edit";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
+        *)         txt_edit "$@"; exit 0;;
+    esac
+fi

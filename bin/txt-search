@@ -1,0 +1,52 @@
+#!/bin/sh -e
+##:
+#h: Usage: txt-search [TERM] [ENGINE]
+#h:
+#h: Show a list of searchers ("x-search--NAME TERM" commands) and
+#h: search the term.
+##:
+. x-compat
+. x-open
+txt_search() {
+    local engine term uterm
+    if test -n "$1"; then
+        term="$*"
+    else
+        term="$(cat)"
+        test -n "${term}"
+    fi
+    if test -n "${X_MENU}"; then
+        engine="$(txt_search_engines | dmenu -p 'txt-search' -l 10)"
+    else
+        engine="google"
+    fi
+    test -n "${engine}"
+    uterm="$(echo "${term}" | txt_search_url_encode)"
+    case "${engine}" in
+        google)     x_open "https://www.google.com/search?q=${uterm}"  ;;
+        duckduckgo) x_open "https://duckduckgo.com/?t=ffab&q=${uterm}" ;;
+        wikipedia)  x_open "https://en.wikipedia.org/wiki/Special:Search?search=${uterm}";;
+        *)          x-search--"${engine}" "${term}";;
+    esac
+}
+## -------------------------------------------------------------------
+txt_search_engines() {
+    echo "google"
+    echo "duckduckgo"
+    echo "wikipedia"
+    x_compat progs x-search-- | sed -n 's|x-search--||p'
+}
+txt_search_url_encode() {
+    sed '
+    s/ /%20/g;     s/!/%21/g;    s/"/%22/g
+    s/#/%23/g;     s/\$/%24/g;   s/\&/%26/g
+    s/'\''/%27/g;  s/(/%28/g;    s/)/%29/g
+    s/:/%3A/g'
+}
+## -------------------------------------------------------------------
+if test @"$(basename "$0")" = @"txt-search"; then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
+        *)         txt_search "$@"; exit 0;;
+    esac
+fi

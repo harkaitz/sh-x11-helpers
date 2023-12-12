@@ -1,74 +1,60 @@
-# X11 HELPERS
+# Implementation of something similar to PLAN9 plumber for X11/Windows.
 
-Small utilities for the X11 desktop. It requires dmenu(1) and X11
-utilities. I use this scripts for personal productivity.
+
+## Windows.
+
+Shortcuts can be slow, fasten:
+
+    Taskkill /IM ApplicationFrameHost.exe /F
+
+    or disable SuperFetch in Sysmain
+    https://superuser.com/questions/426947/slow-windows-desktop-keyboard-shortcuts
+
 
 ## Help
 
-dmenu-fsel
+txt-edit
 
-    Usage: dmenu-fsel [-n NAME][-C DIRECTORY][-c COMMAND,...]
+    Usage: txt-edit < INPUT > OUTPUT
     
-    Select a file or a command using dmenu. The return value can
-    be: "file FILENAME" or "COMMAND DIRECTORY"
+    Read from the standard input, edit and print to standard output.
+
+txt-exec
+
+    Usage: txt-exec < CODE
     
-    Dependencies: dmenu
+    Read command from the standard input and execute in another
+    terminal.
 
-x-auto
+txt-open
 
-    Usage: x-auto -V
+    Usage: txt-open < FILENAME
     
-    Define scripts in "~/Documents/x-auto" with X11 automatizations with
-    xdotool(1) and launch them with "x-auto".
+    Read filenames from standard input and open with x-open(1).
+
+txt-save-link
+
+    Usage: txt-save-link [NAME] < LINK
     
-    Environment variables: X_AUTO_DIRECTORY
-    Dependencies: dmenu, xdotool
+    Save link to "last" link file for x-link(1).
 
-x-clip-edit
+txt-search
 
-    Usage: x-clip-edit : Edit clipboard content.
+    Usage: txt-search [TERM] [ENGINE]
     
-    Dependencies: xclip
+    Show a list of searchers ("x-search--NAME TERM" commands) and
+    search the term.
 
-x-clip-exec
+x-compat
 
-    Usage: x-clip-exec
+    Usage: x-compat ...
     
-    Execute the commands in the clipboard.
-    
-    Dependencies: xclip, xterm
-
-x-clip-open
-
-    Usage: x-clip-open : Open the file in clipboard.
-    
-    Dependencies: xclip
-
-x-clip-pipe
-
-    Usafe: x-clip-pipe [COMMAND]
-    
-    Pipe the content in the clipboard to command and put it's output
-    in the clipboard. If no command is specified it is asked with
-    dmenu.
-    
-    Dependencies: xclip, dmenu
-
-x-clip-trans
-
-    Usage: x-clip-trans : Translate the text inside the clipboard.
-    
-    Environment variables: X_LANGUAGES
-    Dependencies: xclip, xmessage, trans(1)
-
-x-color
-
-    Usage: x-color
-    
-    Select a point in the screen and copy it's color value
-    with the #RRGGBB format.
-    
-    Dependencies: xclip, grabc
+    ... clip-get          : Print text in clipboard.
+    ... clip-put          : Save to clipboard.
+    ... exec CODE         : Execute code from standard input.
+    ... dmenu [-p PROMPT] :
+    ... error HEAD MSG    :
+    ... progs REGEX       : List programs that match REGEX.
 
 x-editor
 
@@ -79,22 +65,9 @@ x-editor
     Environment variables: MEDITOR, XEDITOR
     Known text editors: xedit, mousepad, notepad, emacs
 
-x-keyboard
-
-    Usage: x-keyboard OPS...
-    
-    Configure keyboard shortcuts for desktop environments. For now
-    only XFCE is supported.
-    
-      -V  : Show configuration.
-      -l  : List keyboard shortcuts.
-      -iX : Install XFCE keyboard shortcuts.
-    
-    Environment variables: X_KEYBOARD
-
 x-link
 
-    Usage: x-link -V | [CATEGORY [NAME]]
+    Usage: x-link -Ve | [CATEGORY [NAME]]
     
     Save your links in text format and access them using dmenu.
     
@@ -117,20 +90,6 @@ x-menu
     Environment variables: X_MENU
     Dependencies: dmenu, xterm
 
-x-note
-
-    Usage: x-note -V | ...
-    
-    Take fast notes for later read.
-    
-    ... n NAME      : Create new notes file.
-    ... NAME d      : Delete notes file.
-    ... NAME a TAKE : Add new take.
-    ... NAME p      : Print take (and copy to clipboard)
-    
-    Environment variables: X_NOTE_DIRECTORY (~/Documents/Notes)
-    Dependencies: dmenu, x-editor
-
 x-open
 
     Usage: x-open -V | -l | -m FILE | FILE
@@ -143,64 +102,19 @@ x-open
     
     You can list the scripts with -l and the menu with -m FILE.
 
-x-postit
+x-pipe
 
-    Usage: x-postit [-V][NOTE]
+    Usafe: x-clip [COMMAND]
     
-    Environment variables: X_POSTIT_DIRECTORY
-    Dependencies: dmenu, x-editor
-
-x-report
-
-    Usage: x_report [-nl] [NOTE]
+    Pipe the content in the clipboard to command and put it's output
+    in the clipboard. If no command is specified it is asked with
+    dmenu.
     
-    Directories: "$X_REPORT_DIR", "~/Documents/Notes"
-
-x-screenshot
-
-    Usage: x-screenshot
-    
-    Select a window and take a screenshot.
-    
-    Dependencies: xdotool, xdg-open, import(ImageMagick).
+    Dependencies: xclip, dmenu
 
 x-search
 
-    Usage: x-search [TERM]
-    
-    Show a list of searchers (x-search--NAME commands) and search
-    the term in clipboard.
-    
-    Dependencies: xclip, dmenu, xdg-open
-
-xterm-h-monitor
-
-    Usage: xterm-h-monitor PROGRAM ARGS...
-    
-    Execute program in the background in another xterm session. If
-    the file changes restart the program.
-    
-    Dependencies: xterm, notify-send(optional)
-
-x-todo
-
-    Usage: x-todo ...
-    
-    Daily TODO task management utility.
-    
-      -V : Show configuration.
-      -E : Edit todo template list.
-      -e : Open todo file.
-      -a : Add todo lines from template.
-    
-    Environment variables: TODO_LINES, TODO_FILE
-
-x-wiki
-
-    Usage: x-wiki [-V] : Open/create notes.
-    
-    Environment variables: X_WIKI_DIRECTORY
-    Dependencies: dmenu, xmessage, x-editor
+    Usage: x-search TERM
 
 ## Collaborating
 

@@ -1,6 +1,6 @@
 #!/bin/sh -e
 ##:
-#h: Usage: x-link -V | [CATEGORY [NAME]]
+#h: Usage: x-link -Ve | [CATEGORY [NAME]]
 #h:
 #h: Save your links in text format and access them using dmenu.
 #h:
@@ -9,13 +9,16 @@
 #x:
 #x: Dependencies: xdg-open, dmenu
 ##:
+. x-compat
+. x-editor
 x_link() {
     local OPTIND optopt category link command
     
     ## Parse command line arguments.
-    while getopts "V" optopt; do
+    while getopts "Ve" optopt; do
         case $optopt in
             V)  echo "X_LINK_DIRECTORY : ${X_LINK_DIRECTORY}"; return 0;;
+            e)  x_editor "${X_LINK_DIRECTORY}/last"; return 0;;
             \?) return 1;;
         esac
     done
@@ -78,8 +81,9 @@ x_link_menu_command() {
     fi
     sed -n "/^${link} *\;/s|.*\; *||p" "${X_LINK_DIRECTORY}/${category}"
 }
+## -------------------------------------------------------------------
 X_LINK_DIRECTORY="${X_LINK_DIRECTORY:-${HOME}/Documents/Links}"
-if test @"$(basename "$0")" = @"x-link";then
+if test @"$(basename "$0")" = @"x-link"; then
     case "${1}" in
         -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
         *)         x_link "$@"; exit 0 ;;

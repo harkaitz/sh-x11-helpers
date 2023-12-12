@@ -1,0 +1,18 @@
+#!/bin/sh -e
+##:
+#h: Usage: txt-exec < CODE
+#h:
+#h: Read command from the standard input and execute in another
+#h: terminal.
+##:
+. x-compat
+txt_exec() {
+    x_compat exec "$(cat)"
+}
+## -------------------------------------------------------------------
+if test @"$(basename "$0")" = @"txt-exec"; then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
+        *)         txt_exec "$@"; exit 0;;
+    esac
+fi

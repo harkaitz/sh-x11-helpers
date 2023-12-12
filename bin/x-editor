@@ -32,13 +32,12 @@ x_editor_show_variables() {
     echo "XEDITOR : ${XEDITOR}"
 }
 x_editor_calc_variables() {
-    MEDITOR="${MEDITOR:-$(which xedit mousepad notepad  2>/dev/null | sed 1q )}"
+    MEDITOR="${MEDITOR:-$(which mousepad notepad        2>/dev/null | sed 1q )}"
     XEDITOR="${XEDITOR:-$(which emacs "${XEDITOR_MINI}" 2>/dev/null | sed 1q )}"
 }
 ## -------------------------------------------------------------------
-
 x_editor_calc_variables
-if test @"$(basename "$0")" = @"x-editor";then
+if test @"$(basename "$0")" = @"x-editor"; then
     case "${1}" in
         -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
         *)         x_editor "$@"; exit 0;;

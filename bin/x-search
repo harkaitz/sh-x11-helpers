@@ -1,59 +1,17 @@
 #!/bin/sh -e
 ##:
-#h: Usage: x-search [TERM]
-#h:
-#h: Show a list of searchers (x-search--NAME commands) and search
-#h: the term in clipboard.
-#x:
-#x: Dependencies: xclip, dmenu, xdg-open
+#h: Usage: x-search TERM
 ##:
+. txt-search
 x_search() {
-    local engine term="$*"
-    ##
-    if test ! -n "${term}"; then
-        term="$(xclip -selection "clipboard" -o - | dmenu -p 'x-search' | x_search_url_encode)"
+    local term X_MENU=y
+    if test -n "$1"; then
+        term="$*"
+    else
+        term="$(x_compat clip-get | dmenu -p 'x-search')"
         test -n "${term}"
     fi
-    ##
-    engine="$(x_search_list_engines | dmenu -p 'x-search' -l 10)"
-    test -n "${engine}"
-    ##
-    x_search_run_engine "${engine}" "${term}"
-    
-}
-## -------------------------------------------------------------------
-x_search_list_engines() {
-    local sep dir
-    case "$(uname -o)" in
-        MS/Windows) sep=';';;
-        *)          sep=':';;
-    esac
-    echo "google"
-    echo "duckduckgo"
-    echo "wikipedia"
-    printf '%s' "${PATH}" \
-        | tr "${sep}" '\0' \
-        | xargs -0 ls 2>/dev/null \
-        | sed -n 's|x-search--||p'
-        
-}
-x_search_run_engine() {
-    if test @"${1}" = @"google"; then
-        xdg-open "https://www.google.com/search?q=${2}"
-    elif test @"${1}" = @"duckduckgo"; then
-        xdg-open "https://duckduckgo.com/?t=ffab&q=${2}"
-    elif test @"${1}" = @"wikipedia"; then
-        xdg-open "https://en.wikipedia.org/wiki/Special:Search?search=${2}"
-    else
-        x-search--"${1}" "${2}"
-    fi
-}
-x_search_url_encode() {
-    sed '
-    s/ /%20/g;     s/!/%21/g;    s/"/%22/g
-    s/#/%23/g;     s/\$/%24/g;   s/\&/%26/g
-    s/'\''/%27/g;  s/(/%28/g;    s/)/%29/g
-    s/:/%3A/g'
+    txt_search "${term}"
 }
 ## -------------------------------------------------------------------
 if test @"$(basename "$0")" = @"x-search";then

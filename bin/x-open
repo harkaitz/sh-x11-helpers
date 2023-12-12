@@ -10,6 +10,7 @@
 #h:
 #h: You can list the scripts with -l and the menu with -m FILE.
 ##:
+. x-compat
 x_open() {
     local OPTIND optopt ops=
     
@@ -54,31 +55,9 @@ x_open_calc_variables() {
     esac
 }
 ## -------------------------------------------------------------------
-x_open_dmenu() {
-    local args prompt OPTIND optopt
-    if which wmenu >/dev/null 2>&1; then
-        args="$(cat | tr '\n' ';')"
-        prompt=""
-        while getopts "p:l:" optopt; do
-            case $optopt in
-                p)  prompt="${OPTARG}";;
-                \?) return 1;;
-            esac
-        done
-        shift $(( $OPTIND - 1 ))
-        wmenu ${prompt:+ -prompt "${prompt}" } -elements "${args}" | cat
-    elif which dmenu >/dev/null 2>&1; then
-        dmenu -l 10 -p "$1"
-    else
-        tail -n 1
-    fi
-}
-x_open_error() {
-    echo "error: $*" | x_open_dmenu "X-OPEN"
-}
 x_open_list() {
     local d
-    for d in "${H}"/etc/x-open "${HOME}"/.local/etc/x-open /etc/x-open; do
+    for d in "${H}"/etc/x-open "${HOME}"/.local/etc/x-open; do
         if test -d "${d}"; then
             find "${d}" -type f -executable 2>/dev/null || true
         fi
@@ -98,11 +77,15 @@ x_open_exec() {
         esac
         case "$(wc -l < "$t")" in
             1) c="$(cat "$t")";;
-            *) c="$(x_open_dmenu "$n" < "$t")";;
+            *) c="$(dmenu -p "$n" < "$t")";;
         esac
         if test -n "${c}"; then
             c="$(echo "${c}" | sed 's|(\*)||')"
             mkdir -p ~/.log
+            case "${f}:$(uname -o)" in
+                *://*)        true;;
+                *:MS/Windows) f="$(echo "${f}" | tr '/' '\\')";;
+            esac
             f="${f}" sh -e -c "${c}" > ~/.log/x-open.log 2>&1 &
         fi
     done
@@ -111,7 +94,7 @@ x_open_exec() {
 ## -------------------------------------------------------------------
 x_open_calc_variables
 if test -n "${XDG_OPEN_GUARD}"; then
-    x_open_error "xdg-open loop detected."
+    x_compat error "X-OPEN" "xdg-open loop detected."
     exit 1
 fi
 case "$(basename "$0")" in
