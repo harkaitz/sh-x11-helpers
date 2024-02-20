@@ -1,5 +1,7 @@
-# Implementation of something similar to PLAN9 plumber for X11/Windows.
+X11 Helpers
+===========
 
+Implementation of something similar to PLAN9 plumber for X11/Windows.
 
 ## Windows.
 
@@ -62,7 +64,7 @@ x-editor
     
     Open file with an [-a : advanced] text editor.
     
-    Environment variables: MEDITOR, XEDITOR
+    Environment variables: XEDITOR, AEDITOR
     Known text editors: xedit, mousepad, notepad, emacs
 
 x-link
@@ -97,8 +99,8 @@ x-open
     Open a file or URL using the user's preferred application.
     
     To choose which program to use x-open executes the scripts
-    in '/etc/x-open' and '~/.local/etc/x-open' passing to them
-    the file or URL. Each line they return is a posible command.
+    in '/etc/x-open.d' and '~/.x-open.d' passing to them the file
+    or URL. Each line they return is a posible command.
     
     You can list the scripts with -l and the menu with -m FILE.
 
@@ -109,8 +111,6 @@ x-pipe
     Pipe the content in the clipboard to command and put it's output
     in the clipboard. If no command is specified it is asked with
     dmenu.
-    
-    Dependencies: xclip, dmenu
 
 x-search
 

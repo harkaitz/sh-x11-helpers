@@ -18,7 +18,7 @@ x_link() {
     while getopts "Ve" optopt; do
         case $optopt in
             V)  echo "X_LINK_DIRECTORY : ${X_LINK_DIRECTORY}"; return 0;;
-            e)  x_editor "${X_LINK_DIRECTORY}/last"; return 0;;
+            e)  x_editor -a "${X_LINK_DIRECTORY}"; return 0;;
             \?) return 1;;
         esac
     done

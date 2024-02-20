@@ -5,24 +5,40 @@
 #h: Pipe the content in the clipboard to command and put it's output
 #h: in the clipboard. If no command is specified it is asked with
 #h: dmenu.
-#x:
-#x: Dependencies: xclip, dmenu
 ##:
 . x-compat
 x_pipe() {
+    local cmd tmp res
+    
     if test -n "$1"; then
-        local cmd="$*"
+        cmd="$*"
     else
-        local cmd="$(x_pipe_list | dmenu -p 'Command:')"
+        cmd="$(x_pipe_list | dmenu -p 'Command:')"
         test -n "${cmd}"
         mkdir -p ~/.hist
         echo "${cmd}" > ~/.hist/x-clip-pipe
     fi
-    local tmp="$(mktemp)"
-    x_compat clip-get | X_PIPE=y sh -ec "${cmd}" 2> "${tmp}" | x_compat clip-put
-    if test ! @"$(wc -l < "${tmp}")" = @"0"; then
-        x_compat error "${cmd}" "$(cat "${tmp}")"
+    tmp="$(mktemp)"
+
+    ## Read from clipboard.
+    x_compat clip-get > "${tmp}.0"
+    echo >> "${tmp}.0"
+
+    ## Execute the command.
+    if X_PIPE=y sh -ec "${cmd}" > "${tmp}.1" 2> "${tmp}.2" < "${tmp}.0"; then
+        res=0
+    else
+        res=1
     fi
+    
+    ## Print error.
+    if test @"${res}" = @"1"; then
+        x_compat error "${cmd}" "$(cat "${tmp}.2")"
+        return "${res}"
+    fi
+    
+    ## Print result.
+    x_compat clip-put < "${tmp}.1"
 }
 x_pipe_list() {
     if test -e ~/.hist/x-clip-pipe; then

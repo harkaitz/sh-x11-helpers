@@ -5,8 +5,8 @@
 #h: Open a file or URL using the user's preferred application.
 #h:
 #h: To choose which program to use x-open executes the scripts
-#h: in '/etc/x-open' and '~/.local/etc/x-open' passing to them
-#h: the file or URL. Each line they return is a posible command.
+#h: in '/etc/x-open.d' and '~/.x-open.d' passing to them the file
+#h: or URL. Each line they return is a posible command.
 #h:
 #h: You can list the scripts with -l and the menu with -m FILE.
 ##:
@@ -35,6 +35,7 @@ x_open() {
 x_open_show_variables() {
     echo "XDG_OPEN_ORIG  : ${XDG_OPEN_ORIG}"
     echo "XDG_OPEN_GUARD : ${XDG_OPEN_GUARD}"
+    echo "X_OPEN         : ${X_OPEN}"
 }
 x_open_calc_variables() {
     local c
@@ -57,7 +58,7 @@ x_open_calc_variables() {
 ## -------------------------------------------------------------------
 x_open_list() {
     local d
-    for d in "${H}"/etc/x-open "${HOME}"/.local/etc/x-open; do
+    for d in ${X_OPEN} /etc/x-open.d ~/.x-open.d; do
         if test -d "${d}"; then
             find "${d}" -type f -executable 2>/dev/null || true
         fi
